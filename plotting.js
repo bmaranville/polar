@@ -29,7 +29,8 @@ export class ScrollingPlot {
         // type: log_y.value ? "log" : "linear",
         type: "linear",
         autorange: true,
-      }
+      }, 
+      datarevision: 0,
     };
     plotDiv = null; // HTML element
 
@@ -46,11 +47,13 @@ export class ScrollingPlot {
     add_point(x, y) {
         this.plotData.x.push(x);
         this.plotData.y.push(y);
+        this.layout.datarevision++;
         this.draw();
     }
 
     draw() {
         console.log("x:", this.plotData?.x);
         Plotly.react(this.plotDiv, [this.plotData], this.layout, {responsive: true});
+        Plotly.Plots.resize(this.plotDiv);
     }
 }

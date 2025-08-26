@@ -2,14 +2,14 @@ import { connectToDevice, BluetoothScanner, connectAndReadHr } from "./polar.js"
 
 let device;
 
-const connectButton = document.getElementById("connect");
+// const connectButton = document.getElementById("connect");
 
-connectButton.addEventListener("click", async () => {
-    const new_device = connectToDevice();
-    device = new_device;
-    window.device = new_device;
-    console.log({device});
-})
+// connectButton.addEventListener("click", async () => {
+//     const new_device = connectToDevice();
+//     device = new_device;
+//     window.device = new_device;
+//     console.log({device});
+// })
 
 const startScanButton = document.getElementById("start_scan");
 const stopScanButton = document.getElementById("stop_scan");
@@ -46,7 +46,7 @@ startScanButton.addEventListener("click", async () => {
     await scanner.startScanning(options);
 });
 
-stopScanButton.addEventListener("click", async () => {
+stopScanButton?.addEventListener("click", async () => {
     await scanner.stopScanning();
 });
 

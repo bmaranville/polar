@@ -1,24 +1,38 @@
 <html>
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=5" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <style>
+        document, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+        }
+
         #output {
             font-family: Arial, Helvetica, sans-serif;
             color: red;
             font-size: xx-large;
         }
+
+        div.container {
+            height: 100%;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        #plot {
+            flex: 1;
+        }
     </style>
 </head>
 <body>
-Hello there!
-<button id="connect">Connect</button>
-<div>
-    <button id="start_scan">Start Scanning</button>
-    <button id="stop_scan">Stop Scanning</button>
-</div>
-<div id="output">
-</div>
-<div id="plot"></div>
-<script type="module" src="./main.js" async>
-</script>
+    <div class="container">
+        <h1><button id="start_scan" class="btn btn-primary btn-lg">Start Scanning</button></h1>
+        <!-- <button id="stop_scan">Stop Scanning</button> -->
+        <h1><span id="output" class="text-danger">N/A (bpm)</span></h1>
+        <div id="plot"></div>
+    </div>
+    <script type="module" src="./main.js" async></script>
 </body>
 </html>

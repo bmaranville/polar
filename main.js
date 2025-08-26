@@ -12,7 +12,7 @@ let device;
 // })
 
 const startScanButton = document.getElementById("start_scan");
-const stopScanButton = document.getElementById("stop_scan");
+// const stopScanButton = document.getElementById("stop_scan");
 const scanner = new BluetoothScanner();
 const devices = {};
 window.devices = devices;
@@ -46,7 +46,7 @@ startScanButton.addEventListener("click", async () => {
     await scanner.startScanning(options);
 });
 
-stopScanButton?.addEventListener("click", async () => {
-    await scanner.stopScanning();
-});
+// stopScanButton?.addEventListener("click", async () => {
+//     await scanner.stopScanning();
+// });
 

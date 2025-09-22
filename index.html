@@ -28,9 +28,14 @@
 </head>
 <body>
     <div class="container">
-        <h1><button id="start_scan" class="btn btn-primary btn-lg">Start Scanning</button></h1>
+        <h1>
+            <button id="connect_btn" class="btn btn-primary btn-lg">Connect</button>
+            <button id="cooldown_btn" class="btn btn-lg">Measure Cooldown</button>
+            <button id="disconnect_btn" class="btn btn-secondary btn-lg">Disconnect</button>
+        </h1>
         <!-- <button id="stop_scan">Stop Scanning</button> -->
-        <h1><span id="output" class="text-danger">N/A (bpm)</span></h1>
+        <h1><span id="bpm_output" class="text-danger">N/A (bpm)</span></h1>
+        <h1><span id="cooldown_output" class="text-secondary"></span></h1>
         <div id="plot"></div>
     </div>
     <script type="module" src="./main.js" async></script>

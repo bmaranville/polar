@@ -52,7 +52,7 @@ export class ScrollingPlot {
     }
 
     draw() {
-        console.log("x:", this.plotData?.x);
+        // console.log("x:", this.plotData?.x);
         Plotly.react(this.plotDiv, [this.plotData], this.layout, {responsive: true});
         Plotly.Plots.resize(this.plotDiv);
     }

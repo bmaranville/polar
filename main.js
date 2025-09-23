@@ -1,4 +1,4 @@
-import { connectToDevice, BluetoothScanner, connectAndReadHr } from "./polar.js";
+import { connectToDevice, BluetoothScanner, connectAndReadHr, disconnect, measureCooldown } from "./polar.js";
 
 let device;
 
@@ -11,15 +11,18 @@ let device;
 //     console.log({device});
 // })
 
-const startScanButton = document.getElementById("start_scan");
-// const stopScanButton = document.getElementById("stop_scan");
+const startScanButton = document.getElementById("connect_btn");
+const disconnectButton = document.getElementById("disconnect_btn");
+const cooldownButton = document.getElementById("cooldown_btn");
 const scanner = new BluetoothScanner();
 const devices = {};
 window.devices = devices;
 scanner.onDeviceFound(async (device) => {
     console.log('Found device:', device.name);
     devices[device.name] = device;
-    const { server, characteristic } = await connectAndReadHr(device);
+    const { server, service, characteristic } = await connectAndReadHr(device);
+    window.service = service;
+    window.device = device;
     window.server = server;
     window.characteristic = characteristic;
 });
@@ -46,7 +49,25 @@ startScanButton.addEventListener("click", async () => {
     await scanner.startScanning(options);
 });
 
-// stopScanButton?.addEventListener("click", async () => {
-//     await scanner.stopScanning();
-// });
+disconnectButton?.addEventListener("click", async () => {
+  console.log("Disconnecting...", !!window.device);
+  if (window.service) {
+    await disconnect(window.device);
+    window.device = null;
+    window.service = null;
+    window.server = null;
+    window.characteristic = null;
+  }
+});
+
+cooldownButton?.addEventListener("click", async () => {
+  console.log("Measuring cooldown...", !!window.service);
+  if (window.service) {
+    try {
+      await measureCooldown(window.service);
+    } catch (error) {
+      console.error('Measure cooldown error:', error);
+    }
+  }
+});
 

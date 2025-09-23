@@ -67,7 +67,7 @@ export async function connectAndReadHr(device) {
     // Start notifications
     await characteristic.startNotifications();
     
-    return { server, characteristic };
+    return { server, service, characteristic };
   } catch (error) {
     console.error('Error connecting to H10:', error);
     throw error;
@@ -76,12 +76,66 @@ export async function connectAndReadHr(device) {
 
 const plot = new ScrollingPlot('plot');
 const start_time = Date.now();
-const outputDiv = document.getElementById("output");
+const bpmOutputDiv = document.getElementById("bpm_output");
+const cooldownOutputDiv = document.getElementById("cooldown_output");
 
-function handleHeartRateData(event) {
-  const value = event.target.value;
-  const dataView = new DataView(value.buffer);
-  
+class CooldownMeasurement {
+  #isStarted = false;
+  #startValue = null;
+  #startTime = null;
+  #durationSeconds = 60;
+  #callback = null;
+
+  constructor(durationSeconds = 60, callback = null) {
+    this.#durationSeconds = durationSeconds;
+    this.#callback = callback;
+  }
+
+  start(value) {
+    this.#isStarted = true;
+    this.#startValue = null;
+  }
+
+  reset() {
+    this.#startValue = null;
+    this.#startTime = null;
+    this.#isStarted = false;
+  }
+
+  update(value) {
+    console.log("CooldownMeasurement update:", value, this.#isStarted, this.#startValue, this.#startTime);
+    if (!this.#isStarted) {
+      // Not started yet
+      return null;
+    }
+    const time = Date.now();
+    if (this.#startValue === null) {
+      console.log("Starting cooldown measurement at", value, time);
+      this.#startValue = value;
+      this.#startTime = time;
+      return null;
+    }
+    const time_elapsed = (time - this.#startTime) / 1000;
+    if (time_elapsed >= this.#durationSeconds) {
+      if (this.#callback) {
+        this.#callback(this.#startValue, value, time_elapsed);
+      }
+      this.reset();
+    } else {
+      console.log("Cooldown measurement in progress:", value, time);
+    }
+    return null;
+  }
+}
+
+const cooldownMeasurement = new CooldownMeasurement(60, (startValue, endValue, durationSeconds) => {
+  const cooldown = endValue - startValue;
+  console.log(`Cooldown: ${cooldown} bpm (from ${startValue} to ${endValue}) over ${durationSeconds} seconds`);
+  cooldownOutputDiv.innerText = `Cooldown: ${cooldown} bpm (from ${startValue} to ${endValue}) over ${durationSeconds} seconds`;
+});
+
+
+function decodeHRValue(dataView) {
   // Parse heart rate data according to specification
   const flags = dataView.getUint8(0);
   let heartRate;
@@ -91,15 +145,23 @@ function handleHeartRateData(event) {
   } else {
     heartRate = dataView.getUint8(1); // 8-bit heart rate value
   }
-  const time = (Date.now() - start_time) / 1000.0;
-  console.log(`Current heart rate: ${heartRate} bpm, ${time}`);
-  outputDiv.innerText = `${heartRate} (bpm)`;
+  return heartRate;
+}
 
+function handleHeartRateData(event) {
+  const value = event.target.value;
+  const dataView = new DataView(value.buffer);
+  const heartRate = decodeHRValue(dataView);
+  
+  const time = (Date.now() - start_time) / 1000.0;
+  // console.log(`Current heart rate: ${heartRate} bpm, ${time}`);
+  bpmOutputDiv.innerText = `${heartRate} (bpm)`;
+  cooldownMeasurement.update(heartRate);
   plot.add_point(time, heartRate);
 }
 
 // Cleanup function when done
-async function disconnect(device) {
+export async function disconnect(device) {
   try {
     if (device.gatt.connected) {
       await device.gatt.disconnect();
@@ -109,3 +171,9 @@ async function disconnect(device) {
   }
 }
 
+
+
+export async function measureCooldown() {
+  console.log("Starting cooldown measurement...");
+  cooldownMeasurement.start();
+}

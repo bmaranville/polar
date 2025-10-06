@@ -16,6 +16,7 @@ const disconnectButton = document.getElementById("disconnect_btn");
 const cooldownButton = document.getElementById("cooldown_btn");
 const scanner = new BluetoothScanner();
 const devices = {};
+let wakeLock = null;
 window.devices = devices;
 scanner.onDeviceFound(async (device) => {
     console.log('Found device:', device.name);
@@ -25,6 +26,20 @@ scanner.onDeviceFound(async (device) => {
     window.device = device;
     window.server = server;
     window.characteristic = characteristic;
+    // request wake lock
+    try {
+      if ('wakeLock' in navigator) {
+        wakeLock = await navigator.wakeLock.request('screen');
+        console.log('Wake Lock is active:', wakeLock);
+        wakeLock.addEventListener('release', () => {
+          console.log('Wake Lock was released');
+        });
+      } else {
+        console.warn('Wake Lock API not supported.');
+      }
+    } catch (err) {
+      console.error(`${err.name}, ${err.message}`);
+    }
 });
 
 startScanButton.addEventListener("click", async () => {
@@ -57,6 +72,10 @@ disconnectButton?.addEventListener("click", async () => {
     window.service = null;
     window.server = null;
     window.characteristic = null;
+  }
+  if (wakeLock) {
+    await wakeLock.release();
+    wakeLock = null;
   }
 });
 

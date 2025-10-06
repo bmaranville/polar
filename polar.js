@@ -24,11 +24,12 @@ export class BluetoothScanner {
     }
     
     async startScanning(options = {}) {
+      let device = null;
         if (!this.scanning) {
             this.scanning = true;
             
             try {
-                const device = await navigator.bluetooth.requestDevice({
+                device = await navigator.bluetooth.requestDevice({
                     // acceptAllDevices: true,
                     ...options
                 });
@@ -39,6 +40,7 @@ export class BluetoothScanner {
                 this.stopScanning();
             }
         }
+      return device;
     }
     
     onDeviceFound(callback) {

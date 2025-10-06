@@ -26,23 +26,24 @@ scanner.onDeviceFound(async (device) => {
     window.device = device;
     window.server = server;
     window.characteristic = characteristic;
-    // request wake lock
-    try {
-      if ('wakeLock' in navigator) {
-        wakeLock = await navigator.wakeLock.request('screen');
-        console.log('Wake Lock is active:', wakeLock);
-        wakeLock.addEventListener('release', () => {
-          console.log('Wake Lock was released');
-        });
-      } else {
-        console.warn('Wake Lock API not supported.');
-      }
-    } catch (err) {
-      console.error(`${err.name}, ${err.message}`);
-    }
+    
 });
 
 startScanButton.addEventListener("click", async () => {
+  // request wake lock
+  try {
+    if ('wakeLock' in navigator) {
+      wakeLock = await navigator.wakeLock.request('screen');
+      console.log('Wake Lock is active:', wakeLock);
+      wakeLock.addEventListener('release', () => {
+        console.log('Wake Lock was released');
+      });
+    } else {
+      console.warn('Wake Lock API not supported.');
+    }
+  } catch (err) {
+    console.error(`${err.name}, ${err.message}`);
+  }
   const options = {
     filters: [
       {
@@ -61,7 +62,15 @@ startScanButton.addEventListener("click", async () => {
         // acceptAllDevices: true,
         // optionalServices: ['battery_service'],
     }
-    await scanner.startScanning(options);
+    const device = await scanner.startScanning(options);
+    if (device == null) {
+      console.log('No device selected.');
+      if (wakeLock) {
+        await wakeLock.release();
+        wakeLock = null;
+      }
+      return; 
+    }
 });
 
 disconnectButton?.addEventListener("click", async () => {
